@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.log
+.venv/
+venv/
+*.bak
+~$*
+*.sldprt.bak
+*.sldasm.bak
+*.slddrw.bak
