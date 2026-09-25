@@ -29,9 +29,42 @@ so the model can create, inspect, and fix geometry in real time while a human wa
 4. Design checks: interference, clearances, fastener access, sheet-metal rules, DFM.
 5. Support for other CAD systems and other AI clients.
 
+## Live-session server (SolidWorks)
+
+`live_session_server.py` is a stdio MCP server that gives any AI client real-time awareness of
+a running SOLIDWORKS session. It only reads through the native COM API and never sends
+simulated mouse or keyboard input.
+
+| Tool | Tier | What it does |
+|---|---|---|
+| `live_status` | verified | Version, active document, unsaved/rebuild flags, selection count, in-context edit state |
+| `get_selection` | verified | What the human selected: kind, owning component, click point, plane normal / cylinder axis and radius / circle centre / line endpoints, all in mm |
+| `get_view` | verified | Rotation matrix, translation and zoom of the active view |
+| `get_feature_tree` | verified | Features with type, suppression and error code; assembly components with fixed/suppressed state |
+| `get_rebuild_errors` | verified | Only the features carrying errors, plus suppressed components |
+| `screenshot` | verified | PNG of the graphics area, optionally from a named view with zoom-to-fit; the human's view is restored afterwards |
+| `rebuild` | pilot | Rebuild and report errors |
+| `undo` | pilot | Undo N steps (same as Ctrl+Z) to back out a rejected AI action |
+| `select_by_name` | pilot | Select a named plane/face/feature/component for a following action |
+| `clear_selection` | verified | Clear the selection |
+
+Verified on SOLIDWORKS 2026 SP3, Python 3.14, pywin32 312, mcp 2.2.
+
+### Install
+
+```powershell
+pip install -r requirements.txt
+claude mcp add --scope user sw-live -- python C:\path\to\live_session_server.py
+```
+
+Any MCP client works the same way (Cursor, Codex, Claude Desktop, ...): run
+`python live_session_server.py` over stdio. SOLIDWORKS must already be running at the same
+privilege level as the server.
+
 ## Status
 
-Early. The repo is being set up. Contributions and ideas are welcome.
+Live-session watch tools work. Action tools (sketches, features, mates) come next.
+Contributions and ideas are welcome.
 
 ## License
 
